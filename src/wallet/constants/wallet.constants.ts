@@ -1,0 +1,30 @@
+export const WALLET_CODES = {
+  DEPOSIT_NOT_FOUND: 'DEPOSIT_NOT_FOUND',
+  ALREADY_PROCESSED: 'ALREADY_PROCESSED',
+  AMOUNT_MISMATCH: 'AMOUNT_MISMATCH',
+  PARTNER_UNAVAILABLE: 'PARTNER_UNAVAILABLE',
+  UNBALANCED_TRANSACTION: 'UNBALANCED_TRANSACTION',
+} as const;
+export const WALLET_EVENTS = {
+  DEPOSIT_INITIATED: 'wallet.deposit.create.success',
+  DEPOSIT_CREDITED: 'wallet.deposit.credit.success',
+  DEPOSIT_FLAGGED: 'wallet.deposit.credit.flagged',
+} as const;
+export const WALLET_WARNINGS = { PAYMENT_NOT_COMPLETED: 'PAYMENT_NOT_COMPLETED' } as const;
+export const WALLET_SETTINGS = { PAYSTACK_MOCK_KEY: 'paystack.mock' } as const;
+export const DEPOSIT_STATUS = { PENDING: 'PENDING', SUCCESS: 'SUCCESS', FAILED: 'FAILED', FLAGGED: 'FLAGGED' } as const;
+export const PAYSTACK_STATUS = { SUCCESS: 'success', FAILED: 'failed', ABANDONED: 'abandoned', REVERSED: 'reversed' } as const;
+export const PAYSTACK_EVENTS = { CHARGE_SUCCESS: 'charge.success' } as const;
+export const ACCOUNTS = {
+  FEES: 'HOUSE:FEES',
+  SUBSIDY: 'HOUSE:SUBSIDY',
+  PAYSTACK_CLEARING: 'CLEARING:PAYSTACK',
+  user: (id: string) => `USER:${id}`,
+  market: (id: string) => `MARKET:${id}`,
+} as const;
+export const ACCOUNT_KIND = { USER: 'USER', MARKET: 'MARKET', SYSTEM: 'SYSTEM' } as const;
+export const LEDGER_KIND = {
+  DEPOSIT: 'DEPOSIT', TRADE_BUY: 'TRADE_BUY', TRADE_SELL: 'TRADE_SELL',
+  MARKET_SUBSIDY: 'MARKET_SUBSIDY', PAYOUT: 'PAYOUT', REFUND: 'REFUND', SUBSIDY_RETURN: 'SUBSIDY_RETURN',
+} as const;
+export const DEPOSIT_LIMITS_KOBO = { MIN: 10_000, MAX: 500_000_000 } as const; // ₦100 – ₦5,000,000

@@ -1,0 +1,14 @@
+export const SETTLEMENT_CODES = {
+  MARKET_NOT_FOUND: 'MARKET_NOT_FOUND',
+  OUTCOME_NOT_FOUND: 'OUTCOME_NOT_FOUND',
+  MARKET_STILL_OPEN: 'MARKET_STILL_OPEN',
+  RESOLUTION_ALREADY_PROPOSED: 'RESOLUTION_ALREADY_PROPOSED',
+  NO_PENDING_RESOLUTION: 'NO_PENDING_RESOLUTION',
+  FOUR_EYES_REQUIRED: 'FOUR_EYES_REQUIRED',
+} as const;
+export const SETTLEMENT_EVENTS = {
+  PROPOSED: 'settlements.resolution.propose.success',
+  RESOLVED: 'settlements.resolution.confirm.success',
+  VOIDED: 'settlements.resolution.void.success',
+} as const;
+export const SETTLEMENT_WARNINGS = { NO_WINNING_POSITIONS: 'NO_WINNING_POSITIONS' } as const;
