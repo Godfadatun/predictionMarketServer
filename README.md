@@ -10,7 +10,7 @@ Frontend: [`predictionMarket`](https://github.com/godfadatun/predictionMarket).
 |---|---|
 | Pricing | **LMSR** automated market maker (`src/utils/lmsr.ts`). Each market has liquidity `b`. Prices always sum to 1, so 0.62 means a 62% chance. |
 | Shares | A winning share pays **₦100**. A losing share pays ₦0. |
-| House risk | When a market is created, its pool is funded from `HOUSE:SUBSIDY` with the LMSR worst-case loss `b·ln(n)`. The seeded catalogue's total exposure is about ₦12.1m at the default `b` values. Tune `liquidityB` per market. |
+| House risk | When a market is created, its pool is funded from `HOUSE:SUBSIDY` with the LMSR worst-case loss `b·ln(n)`. The seeded catalogue's worst-case total is about ₦3.1m. Tune `liquidityB` per market: a lower `b` means cheaper to run but prices move more per trade. |
 | Fees | 2% on buys and sells (`TRADE_FEE_BPS`), credited to `HOUSE:FEES`. |
 | Ledger | **Double-entry.** Every balance change is a transaction whose legs sum to 0 (`LedgerService.post`). Accounts are row-locked in code order. User accounts can never go negative. |
 | Deposits | Paystack `transaction/initialize`, then a user verify call or the signed `charge.success` webhook. Both **re-verify with Paystack** before crediting. A paid amount that doesn't match the deposit marks it `FLAGGED` for manual review. |
