@@ -9,6 +9,8 @@ const SYSTEM = [
   { code: ACCOUNTS.FEES, allowNegative: false },
   { code: ACCOUNTS.SUBSIDY, allowNegative: true },
   { code: ACCOUNTS.PAYSTACK_CLEARING, allowNegative: true },
+  { code: ACCOUNTS.PAYOUTS_IN_FLIGHT, allowNegative: true },
+  { code: ACCOUNTS.TRANSFER_FEES, allowNegative: true },
 ];
 const kindOf = (code: string) => code.startsWith('USER:') ? ACCOUNT_KIND.USER : code.startsWith('MARKET:') ? ACCOUNT_KIND.MARKET : ACCOUNT_KIND.SYSTEM;
 

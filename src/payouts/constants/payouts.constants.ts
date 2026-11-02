@@ -33,3 +33,4 @@ export const AUTO_PAYOUT_MIN_KOBO = 100_000; // winnings of ₦1,000+ are sent t
 export const TRANSFER_FEE_TIERS_KOBO = [{ upTo: 500_000, fee: 1_000 }, { upTo: 5_000_000, fee: 2_500 }, { upTo: Infinity, fee: 5_000 }] as const;
 export const NAME_MATCH_MIN_TOKENS = 2;
 export const BANKS_CACHE_MS = 24 * 3_600_000;
+export const TRANSFER_OUTCOME = { ACCEPTED: 'ACCEPTED', REJECTED: 'REJECTED', UNKNOWN: 'UNKNOWN' } as const;

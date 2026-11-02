@@ -30,6 +30,6 @@ export class PaystackPayoutsMockV1 {
   async createRecipient(): Promise<string> { return this.recipientBody('RCP_mock').data.recipient_code; }
   async transfer(input: { reference: string; amountKobo: number }): Promise<TransferResult> {
     const d = this.transferBody(input.reference, input.amountKobo, 'success').data;
-    return { status: d.status, transferCode: d.transfer_code };
+    return { outcome: 'ACCEPTED', status: d.status, transferCode: d.transfer_code };
   }
 }

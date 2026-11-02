@@ -8,5 +8,5 @@ export const referenceParamSchema = Joi.object({ reference: Joi.string().pattern
 export const ledgerQuerySchema = Joi.object({ limit: Joi.number().integer().min(1).max(100).default(50) });
 export const paystackWebhookSchema = Joi.object({
   event: Joi.string().required(),
-  data: Joi.object({ reference: Joi.string().required(), amount: Joi.number(), status: Joi.string() }).unknown(true).required(),
+  data: Joi.object({ reference: Joi.string(), amount: Joi.number(), status: Joi.string() }).unknown(true).required(),
 }).unknown(true);

@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { bigintKobo } from '@/common/database/bigint.transformer';
 
 @Entity('markets')
 export class MarketEntity {
@@ -14,6 +15,8 @@ export class MarketEntity {
   @Column({ name: 'resolution_source', type: 'text' }) resolutionSource: string;
   @Column({ name: 'resolution_rules', type: 'text' }) resolutionRules: string;
   @Column({ name: 'created_by', type: 'uuid', nullable: true }) createdBy: string | null;
+  @Column({ name: 'trade_count', type: 'int', default: 0 }) tradeCount: number;
+  @Column({ name: 'volume_kobo', type: 'bigint', default: 0, transformer: bigintKobo }) volumeKobo: number;
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' }) createdAt: Date;
 }
 

@@ -46,8 +46,8 @@ export class AuthService {
   }
 
   async logout(actor: AuthUser) {
-    await this.repo.revokeSession(actor.sessionId);
-    await this.audit.record({ event: AUTH_EVENTS.LOGGED_OUT, module: 'auth', tableType: 'sessions', tableId: actor.sessionId, actorId: actor.id, sessionId: actor.sessionId });
+    await this.repo.revokeSession(actor.sessionId!);
+    await this.audit.record({ event: AUTH_EVENTS.LOGGED_OUT, module: 'auth', tableType: 'sessions', tableId: actor.sessionId!, actorId: actor.id, sessionId: actor.sessionId });
     return SuccessResponse({ revoked: true }, AUTH_MESSAGES.LOGGED_OUT);
   }
 

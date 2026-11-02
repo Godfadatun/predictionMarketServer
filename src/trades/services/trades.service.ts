@@ -47,6 +47,7 @@ export class TradesService {
 
       await this.ledger.post(m, { txRef: `trade:${tradeId}`, kind: side === TRADE_SIDE.BUY ? LEDGER_KIND.TRADE_BUY : LEDGER_KIND.TRADE_SELL, legs: fill.legs });
       await this.markets.setOutcomeShares(m, outcomeId, qAfter[idx]);
+      await this.markets.touchTrade(m, marketId, fill.amountKobo);
       await this.trades.insertTrade(m, {
         id: tradeId, userId: actor.id, marketId, outcomeId, side, shares: fill.shares, amountKobo: fill.amountKobo, feeKobo: fill.feeKobo,
         priceBefore, priceAfter: pricesAfter[idx], idempotencyKey, createdAt: new Date(),

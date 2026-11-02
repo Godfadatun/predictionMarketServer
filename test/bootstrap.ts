@@ -44,7 +44,7 @@ export const db = {
   },
   async findMany(table: string, w: Row): Promise<Row[]> {
     const q = where(w);
-    return ds.query(`SELECT * FROM ${table} ${q.sql} ORDER BY created_at NULLS LAST`, q.params);
+    return ds.query(`SELECT * FROM ${table} ${q.sql} ORDER BY ctid`, q.params); // insertion order; not every table has created_at
   },
   async count(table: string, w: Row = {}): Promise<number> {
     const q = where(w);

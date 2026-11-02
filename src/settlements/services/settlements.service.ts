@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { APP_EVENTS, MarketSettledEvent } from '@/constants/events';
 import { EntityManager } from 'typeorm';
 import { Success, SuccessResponse } from '@/common/responses';
 import { UnitOfWork } from '@/common/database/unit-of-work';
@@ -28,6 +30,7 @@ export class SettlementsService {
   constructor(
     private readonly repo: SettlementsRepository, private readonly markets: MarketsRepository, private readonly trades: TradesRepository,
     private readonly ledger: LedgerService, private readonly uow: UnitOfWork, private readonly audit: AuditService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async get(marketId: string) {
@@ -73,9 +76,11 @@ export class SettlementsService {
         event: r.isVoid ? SETTLEMENT_EVENTS.VOIDED : SETTLEMENT_EVENTS.RESOLVED, module: 'settlements', tableType: 'markets', tableId: marketId,
         actorId: actor.id, sessionId: actor.sessionId, meta: { outcomeId: r.outcomeId, totalPaidKobo: total, winners: payouts.length },
       }, m);
-      return SuccessResponse<SettlementResult>({ ...view({ ...r, confirmedBy: actor.id, confirmedAt: new Date() }, status), totalPaidKobo: total, winners: payouts.length });
+      const settled: MarketSettledEvent = { marketId, isVoid: r.isVoid, payouts: payouts.map((p) => ({ userId: p.userId, amountKobo: p.amountKobo })) };
+      return SuccessResponse({ settled, view: { ...view({ ...r, confirmedBy: actor.id, confirmedAt: new Date() }, status), totalPaidKobo: total, winners: payouts.length } as SettlementResult });
     });
-    const d = result.data;
+    await this.events.emitAsync(APP_EVENTS.MARKET_SETTLED, result.data.settled);
+    const d = result.data.view;
     const warnings = !d.isVoid && d.winners === 0 ? [SETTLEMENT_WARNINGS.NO_WINNING_POSITIONS] : undefined;
     return SuccessResponse(d, d.isVoid ? SETTLEMENT_MESSAGES.VOIDED : SETTLEMENT_MESSAGES.RESOLVED, warnings);
   }

@@ -9,5 +9,6 @@ export interface WithdrawalRecord {
   failureReason: string | null; completedAt: Date | null; createdAt: Date;
 }
 export interface PaystackPayoutEvent { event: string; data: Record<string, any> }
-export interface TransferResult { status: string; transferCode: string | null }
+export type TransferOutcome = 'ACCEPTED' | 'REJECTED' | 'UNKNOWN';
+export interface TransferResult { outcome: TransferOutcome; status: string; transferCode: string | null; message?: string }
 export interface Bank { name: string; code: string }

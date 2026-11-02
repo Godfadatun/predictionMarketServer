@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { APP_EVENTS } from '@/constants/events';
 import { randomBytes } from 'crypto';
 import { EntityManager } from 'typeorm';
 import { Success, SuccessResponse } from '@/common/responses';
@@ -23,7 +25,7 @@ type Settled = { deposit: DepositEntity; status: string; mismatch: boolean };
 export class WalletService {
   constructor(
     private readonly deposits: DepositsRepository, private readonly ledger: LedgerService,
-    private readonly uow: UnitOfWork, private readonly audit: AuditService,
+    private readonly uow: UnitOfWork, private readonly audit: AuditService, private readonly events: EventEmitter2,
   ) {}
 
   async getWallet(actor: AuthUser) {
@@ -63,8 +65,9 @@ export class WalletService {
     return SuccessResponse(data, pending ? WALLET_MESSAGES.PAYMENT_NOT_COMPLETED : WALLET_MESSAGES.DEPOSIT_CREDITED, pending ? [WALLET_WARNINGS.PAYMENT_NOT_COMPLETED] : undefined);
   }
 
-  // Paystack webhook: acknowledge everything; credit only PENDING deposits that Paystack re-confirms.
+  // Paystack webhook: charge.* is ours; other events (transfers, KYC) go to their owning feature. Errors → non-200 so Paystack retries.
   async handlePaystackEvent(event: PaystackWebhookEvent) {
+    await this.events.emitAsync(APP_EVENTS.PAYSTACK_WEBHOOK, event);
     await this.uow.run(async (m) => {
       const deposit = event.event === PAYSTACK_EVENTS.CHARGE_SUCCESS ? await this.deposits.lockByReference(m, event.data.reference) : null;
       if (!deposit || deposit.status !== DEPOSIT_STATUS.PENDING) return SuccessResponse(null);

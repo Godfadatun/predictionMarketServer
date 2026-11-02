@@ -18,6 +18,27 @@ const CANDIDATES = [
 ];
 const PARTIES = ['APC', 'ADC', 'PDP', 'NDC', 'APM', 'LP', 'Accord', 'Other party'];
 const GOVERNORSHIP_STATES = ['Lagos', 'Kano', 'Rivers', 'Oyo', 'Kaduna', 'Enugu', 'Delta', 'Akwa Ibom'];
+// Named-candidate markets where INEC's final list (10 Oct 2026, updated 31 Oct) was reported consistently. Names in INEC's
+// surname-first order. Kano/Kaduna/Delta/Akwa Ibom stay party markets (blank NDC slot, Accord vs Action Alliance confusion).
+// VERIFY against the INEC PDFs (inecnigeria.org/documents/FINAL LIST - <STATE> STATE GOVERNORSHIP.pdf) before opening trading.
+const GOVERNORSHIP_CANDIDATES: Record<string, string[]> = {
+  Lagos: [
+    'Hamzat Kadri Obafemi (APC)', 'Rhodes-Vivour Gbadebo (ADC)', 'Doherty Adedeji Olugbemiga (PDP)', 'Doherty Olufunso Adeshina (NDC)',
+    'Odunaike Oluwapemilerin Olurotimi (LP)', 'Adeoye Adelaja Azeez (APM)', 'Otitoloju Sowore (Accord)', 'Onifade Ademoyegun Taiwo (NNPP)',
+  ],
+  Rivers: [
+    'Chinda Kingsley Ogundu (APC)', 'Ejekwu Samuel Soni (PDP)', 'Pidomson Gabriel Baritulem (ADC)', 'Lulu-Briggs Dumo Owukori (NDC)',
+    'Boms Chima Ernest (LP)', 'Whyte Churchill Dagogo (APM)', 'Chibuzor Israel Rain (Accord)', 'Pepple Wari Dienye (NNPP)',
+  ],
+  Oyo: [
+    'Alli Sharafadeen Abiodun (APC)', 'Gbolarumi Hazeem (PDP)', 'Adegoke Taofeek Adegboyega (ADC)', 'Yusuf Akim Adebola (NDC)',
+    'Kareem Sola Thompson (LP)', 'Adekanmbi Abimbola (APM)', 'Hamzat Abdulrahman Oriyomi (Accord)',
+  ],
+  Enugu: [
+    'Mbah Peter Ndubuisi (APC)', 'Nnaji Uchechukwu Geoffrey (PDP)', 'Ocho Obodoeze Chukwuma (ADC)', 'Ohaa Chinyeaka Christian (NDC)',
+    'Ugwu Okwudilichukwu Chukwudera (LP)', 'Alor Edwin Ikechukwu (Accord)', 'Nnaji Jehu (NNPP)',
+  ],
+};
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 const INEC = 'INEC official declaration (Form EC8D state collation / EC8E national declaration), cross-checked on IReV';
 
@@ -46,19 +67,18 @@ const catalogue = (): CreateMarketInput[] => [
     closesAt: PRESIDENTIAL_DAY_CLOSE, resolutionSource: INEC, liquidityB: 500, outcomes: ['Yes', 'No'],
     resolutionRules: 'Resolves YES if total votes cast / total registered voters on INEC’s final national summary is strictly greater than 30.00%.',
   },
-  ...GOVERNORSHIP_STATES.map((state) => ({
+  ...GOVERNORSHIP_STATES.map((state) => (GOVERNORSHIP_CANDIDATES[state] ? {
+    slug: `governorship-2027-${slugify(state)}`, title: `Who will win the 2027 ${state} governorship election?`, category: MARKET_CATEGORY.GOVERNORSHIP, state,
+    description: `The candidate INEC returns as Governor-elect of ${state} State after the 6 February 2027 election.`,
+    closesAt: GOVERNORSHIP_CLOSE, resolutionSource: 'INEC returning officer declaration for the state, cross-checked on IReV', liquidityB: 400,
+    outcomes: [...GOVERNORSHIP_CANDIDATES[state], 'Other candidate'],
+    resolutionRules: 'Resolves to the candidate INEC declares winner (including after a supplementary election). If a listed candidate is substituted before the poll, the substitute counts as "Other candidate". Tribunal/court decisions do NOT change the result. Postponement over 30 days voids the market.',
+  } : {
     slug: `governorship-2027-${slugify(state)}`, title: `Which party will win the 2027 ${state} governorship election?`, category: MARKET_CATEGORY.GOVERNORSHIP, state,
     description: `The party of the candidate INEC returns as Governor-elect of ${state} State after the 6 February 2027 election.`,
     closesAt: GOVERNORSHIP_CLOSE, resolutionSource: 'INEC returning officer declaration for the state, cross-checked on IReV', liquidityB: 400, outcomes: PARTIES,
     resolutionRules: 'Resolves to the party of the candidate INEC declares winner (including after a supplementary election). Tribunal/court decisions do NOT change the result. Postponement over 30 days voids the market.',
   })),
-  {
-    slug: 'spotify-ng-weekly-2026-11-06', title: 'Who will have the #1 song on Spotify Nigeria (week of 6–12 Nov 2026)?', category: MARKET_CATEGORY.MUSIC,
-    description: 'The lead artist of the #1 track on the official Spotify Weekly Top Songs – Nigeria chart for the week 6–12 November 2026.',
-    closesAt: new Date('2026-11-05T22:00:00Z'), resolutionSource: 'charts.spotify.com → Weekly Top Songs → Nigeria', liquidityB: 200,
-    outcomes: ['Burna Boy', 'Wizkid', 'Davido', 'Asake', 'Rema', 'Ayra Starr', 'Seyi Vibez', 'Other artist'],
-    resolutionRules: 'Resolves to the FIRST-listed (lead) artist of the #1 track on the official chart covering 6–12 Nov 2026. Featured artists do not count. If Spotify does not publish the chart within 7 days, the market is voided.',
-  },
 ];
 
 async function main() {
@@ -70,7 +90,7 @@ async function main() {
     `INSERT INTO users (email, phone, full_name, password_hash, role, status) VALUES ($1, $2, 'Market Ops', $3, 'ADMIN', 'ACTIVE') ON CONFLICT (email) DO NOTHING`,
     [email, process.env.SEED_ADMIN_PHONE ?? '+2348000000000', await bcrypt.hash(password, 10)]);
   const [admin] = await ds.query(`SELECT id, email FROM users WHERE email = $1`, [email]);
-  const actor: AuthUser = { id: admin.id, email: admin.email, role: 'ADMIN', sessionId: null as unknown as string };
+  const actor: AuthUser = { id: admin.id, email: admin.email, role: 'ADMIN', sessionId: null, fullName: 'Market Ops', phone: '' };
   const markets = app.get(MarketsService);
   let created = 0;
   for (const m of catalogue()) {
@@ -79,7 +99,10 @@ async function main() {
     await markets.create(actor, m);
     created += 1;
   }
-  console.log(`seed: admin ${email}; ${created} markets created (${catalogue().length} in catalogue)`);
+  const now = new Date();
+  const friday = new Date(now.getTime() + (((5 - now.getUTCDay() + 7) % 7) || 7) * 86_400_000).toISOString().slice(0, 10);
+  const spotify = await markets.spotifyWeekly(actor, friday);
+  console.log(`seed: admin ${email}; ${created} markets created (${catalogue().length} in catalogue); spotify week ${friday}: ${spotify.message}`);
   await app.close();
 }
 

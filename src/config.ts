@@ -13,5 +13,6 @@ export const config = {
     secretKey: process.env.PAYSTACK_SECRET_KEY ?? 'sk_test_dev',
     callbackUrl: process.env.PAYSTACK_CALLBACK_URL ?? 'http://localhost:3000/wallet/callback',
   },
+  bvnPepper: process.env.BVN_PEPPER ?? 'dev-bvn-pepper',
   mockSettings: (process.env.MOCK_SETTINGS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
 };

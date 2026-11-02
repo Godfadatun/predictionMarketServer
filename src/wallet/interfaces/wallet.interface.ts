@@ -9,4 +9,4 @@ export interface DepositRecord {
 }
 export interface AccountRecord { id: string; code: string; kind: string; userId: string | null; balanceKobo: number; allowNegative: boolean }
 export interface LedgerEntryRecord { id: string; txRef: string; accountId: string; amountKobo: number; balanceAfterKobo: number; kind: string; createdAt: Date }
-export interface PaystackWebhookEvent { event: string; data: { reference: string; amount: number; status: string } }
+export interface PaystackWebhookEvent { event: string; data: { reference: string; amount: number; status: string } & Record<string, unknown> }

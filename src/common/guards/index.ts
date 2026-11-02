@@ -24,11 +24,11 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedError();
     }
     const [row] = await this.ds.query(
-      `SELECT s.id AS "sessionId", s.expires_at AS "expiresAt", s.revoked_at AS "revokedAt", u.id, u.role, u.status, u.email
+      `SELECT s.id AS "sessionId", s.expires_at AS "expiresAt", s.revoked_at AS "revokedAt", u.id, u.role, u.status, u.email, u.full_name AS "fullName", u.phone
          FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = $1`, [sid]);
     if (!row || row.revokedAt || row.status !== 'ACTIVE') throw new UnauthorizedError();
     if (new Date(row.expiresAt).getTime() <= Date.now()) throw new UnauthorizedError(ERROR_CODES.SESSION_EXPIRED, MESSAGES.SESSION_EXPIRED);
-    req.user = { id: row.id, role: row.role, sessionId: row.sessionId, email: row.email } satisfies AuthUser;
+    req.user = { id: row.id, role: row.role, sessionId: row.sessionId, email: row.email, fullName: row.fullName, phone: row.phone } satisfies AuthUser;
     return true;
   }
 }
