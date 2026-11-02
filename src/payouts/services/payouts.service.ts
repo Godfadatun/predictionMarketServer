@@ -60,7 +60,7 @@ export class PayoutsService {
     const [firstName, lastName] = [profile[0], profile[profile.length - 1]];
     const customerCode = await ps.ensureCustomer({ email: actor.email, firstName, lastName, phone: actor.phone });
     await ps.requestIdentification(customerCode, { accountNumber, bankCode, bvn, firstName, lastName });
-    const bankName = (this.banksCache?.banks.find((b) => b.code === bankCode)?.name) ?? null;
+    const bankName = await this.banks().then((r) => r.data.find((x) => x.code === bankCode)?.name ?? null).catch(() => null); // display only; never blocks KYC
     const account = await this.uow.run(async (m) => {
       const row = await this.repo.upsertAccount(m, {
         userId: actor.id, bankCode, bankName, accountNumber, accountName, bvnLast4: bvn.slice(-4), bvnHash: bvnHash(bvn),
